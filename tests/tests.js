@@ -486,6 +486,35 @@ var runTests = function(title, JSQL){
         assert.deepEqual(e.distinct('d').get(), [55], 'e.distinct(\'d\').get()');
     });
 
+   QUnit.test(title + 'transform()', function(assert){
+
+        var testData = [
+            {a: 'abc', b: 99},
+            {a: 'xyz', b: 10}
+        ];
+
+        var e = new JSQL(testData);
+
+        assert.deepEqual(e.select().transform('b', function(obj){ return obj['b'] * 10}).get(),
+        [
+            {a: 'abc', b: 990},
+            {a: 'xyz', b: 100}
+        ], "e.select().transform('b', function(obj) return obj.b * 10}).get()");
+
+        assert.deepEqual(e.select().transform('a', function(obj){ return obj['a'].toUpperCase()}).get(),
+        [
+            {a: 'ABC', b: 990},
+            {a: 'XYZ', b: 100}
+        ], "e.select().transform('b', function(obj) { return obj['a'].toUpperCase()}).get()");
+
+       assert.deepEqual(e.select().transform('c', function(obj){ return obj['a']+obj['b']}).get(),
+        [
+            {a: 'ABC', b: 990, c: 'ABC990'},
+            {a: 'XYZ', b: 100, c: 'XYZ100'}
+        ], "e.select().transform('c', function(obj){ return obj['a']+obj['b']}).get()");
+
+    });
+
     QUnit.test(title + 'get()', function(assert){
         var testData = [{'a': 'b', 'c': [1,2,3]}];
         var e = new JSQL(testData);
@@ -561,6 +590,15 @@ var runTests = function(title, JSQL){
         , [2,4,6], '_filter([1,2,3,4,5,6]');
     });
 
+   QUnit.test(title + '_map()', function(assert){
+        var e = new JSQL;
+        assert.deepEqual(
+            e._map([1,2,3,4,5,6], function(arg){
+            return arg * 2;
+        })
+        , [2,4,6,8,10,12], 'e._map([1,2,3,4,5,6], function(arg){ return arg * 2; }');
+    });
+
     QUnit.test(title + '_getUnique()', function(assert){
         var e = new JSQL;
         assert.deepEqual(
@@ -580,7 +618,7 @@ var runTests = function(title, JSQL){
 
         var e = new JSQL;
         assert.deepEqual(
-            e.pluck(testData, 'a'), [1,1,2,0,null,3], '_pluck(testData, \'a\')');
+            e._pluck(testData, 'a'), [1,1,2,0,null,3], '_pluck(testData, \'a\')');
     });
 
     QUnit.test(title + '_queryObj()', function(assert){

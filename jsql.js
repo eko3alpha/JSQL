@@ -11,7 +11,8 @@
 }(this, function(){
 
     var JSQL = function(value){
-        this.data = this.tmp = value;
+        this.data = value;
+        this.tmp  = value;
 
         this.query = {
             select: [],
@@ -113,7 +114,31 @@
         return passedElements;
     };
 
-    JSQL.prototype.pluck = function(list, key){
+    /**
+     * Mapping function
+     * @private
+     * @param  {array}   list     list of values
+     * @param  {Function} callback function to execute on every value
+     * @return {mixed}
+     */
+    JSQL.prototype._map = function(list, callback){
+        var transformed = [];
+        var i;
+        var len = list.length;
+        for(i = 0; i < len; i++){
+            transformed.push(callback(list[i]));
+        }
+        return transformed;
+    };
+
+    /**
+     * Extracts the given keys
+     * @private
+     * @param  {array} list list of objects
+     * @param  {string} key  property to extract
+     * @return {array}
+     */
+    JSQL.prototype._pluck = function(list, key){
         var i = 0;
         var len = list.length
         var plucked = [];
@@ -124,11 +149,30 @@
     }
 
     /**
+     * Extracts the properties given from
+     * objects.  Select implementation
+     * @param  {array} list list of objects
+     * @param  {array} keys properties to extract
+     * @return {object}
+     */
+    JSQL.prototype._pluckMany = function(list, keys){
+        return this._map(list, function(item){
+            var obj = {};
+            var i;
+            var len = keys.length;
+            for(i = 0; i < len; i++){
+                obj[keys[i]] = item[keys[i]];
+            }
+
+            return obj;
+        });
+    };
+
+    /**
      * Query options
      * @param  {object} options options
      * @return {void}
      */
-
     JSQL.prototype.options = function(options){
         this.options = this._extend(this.options, options);
     };
@@ -140,7 +184,6 @@
      * @public
      * @return {string} 0 or many string arguments allowed
      */
-
     JSQL.prototype.select = function(){
         this._reset();
         this.query.select = arguments;
@@ -588,23 +631,19 @@
     };
 
     /**
-     * Extracts the properties given from
-     * objects.  Select implementation
-     * @param  {array} list list of objects
-     * @param  {array} keys properties to extract
+     * Sets property to callback value,
+     * object is accessible within the callback
+     * @public
+     * @param  {string}   key      property to set
+     * @param  {Function} callback callback to execute
      * @return {object}
      */
-    JSQL.prototype._pluckMany = function(list, keys){
-        return list.map(function(item){
-            var obj = {};
-            var i;
-            var len = keys.length;
-            for(i = 0; i < len; i++){
-                obj[keys[i]] = item[keys[i]];
-            }
-
+    JSQL.prototype.transform = function(key, callback){
+        this.tmp = this._filter(this.tmp, function(obj){
+            obj[key] = callback(obj);
             return obj;
         });
+        return this;
     };
 
     /* output */
@@ -627,7 +666,7 @@
         }
 
         if(this.query.distinct){
-            finalVal = this._getUnique(this._filter(this.pluck(finalVal, this.query.distinct), function(item){
+            finalVal = this._getUnique(this._filter(this._pluck(finalVal, this.query.distinct), function(item){
                 if(item === undefined){
                     return false;
                 }
@@ -676,7 +715,7 @@
      * @return {void}
      */
     JSQL.prototype._reset = function(){
-        this.tmp = this.data;
+        this.tmp = (function(val){return val})(this.data);
         this.query = {
             select: [],
             distinct: undefined,
