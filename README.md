@@ -1,11 +1,11 @@
 # JSQL
-JSQL allows you to dynamically build queries to run against a collection of objects in a very human readable syntax.  It's perfect for filtering/sorting table data.  Compatible with any MVVM library such as knockout or angular.
+JSQL allows you to dynamically build queries to run against a collection of objects in a very human readable syntax.  It's perfect for filtering/sorting table data.
 
 Quick Start:
 ------
 
 This is the data used for the following examples.
-
+````
     var data = [
           { "name": "Portia Zamora", "age": 48, "city": "Morkhoven" },
           { "name": "Rahim Wiggins", "age": 42, "city": "Orlando" },
@@ -20,13 +20,13 @@ This is the data used for the following examples.
           { "name": "Shoshana Fox", "age": 62, "city": "Ludwigsfelde" },
           { "name": "Jack Gilbert", "age": 55, "city": "Parkland County" }
         ];
-
+````
 Once you have the data you can create a new JSQL object.
-
+````
     var people = new JSQL(data);
-
+````
 Here are some examples using slightly different syntax.
-
+````
     people
     .select()
     .where("age", "60")
@@ -81,39 +81,7 @@ Here are some examples using slightly different syntax.
 
     /* result */
     [28, 32, 40, 42, 48, 54, 55, 60, 61, 62]
-
-
-API
-___
-
-.select()
-
-
-
-
-
-.where()
-.associate()
-get()
-getOne()
-limit()
-regEx()
-like()
-startsWith()
-endsWith()
-sortBy()
-      sortAsc()
-      sortDesc()
-count()
-in()
-notIn()
-lt
-lte
-gt
-gte
-distinct
-
-
+````
 
 
 
