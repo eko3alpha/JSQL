@@ -15,6 +15,11 @@
         this.tmp  = value;
 
         this.query = {
+            stats: {
+                count: value.length,
+                operations: []
+            },
+            options: {},
             select: [],
             distinct: undefined,
             sort: {}
@@ -169,6 +174,24 @@
     };
 
     /**
+     * Adds operation to queue
+     * @private
+     * @return {void}
+     */
+    JSQL.prototype._addOp = function(op){
+        this.query.stats.operations.push(op);
+    }
+
+    /**
+     * Returns stats related to query
+     * @public
+     * @returns {Object}
+     */
+    JSQL.prototype.getStats = function(){
+        return this.query.stats;
+    };
+
+    /**
      * Query options
      * @param  {object} options options
      * @return {void}
@@ -186,6 +209,7 @@
      */
     JSQL.prototype.select = function(){
         this._reset();
+        this._addOp('select');
         this.query.select = arguments;
         return this;
     };
@@ -212,6 +236,7 @@
 
         // where('a', 44)
         if(arguments.length === 2 && typeof arguments[0] === 'string'){
+            this._addOp('where')
             var obj = {};
             obj[arguments[0]] = arguments[1];
             this.tmp = this._queryObj(this.tmp, obj);
@@ -226,6 +251,7 @@
 
         // where({a: 10})
         if(typeof val === 'object'){
+            this._addOp('where')
             this.tmp = this._queryObj(this.tmp, val);
             return this;
         }
@@ -268,6 +294,7 @@
      * @return {object}
      */
     JSQL.prototype.orWhere = function(val){
+        this._addOp('where');
         var self = this;
         this.tmp = this._filter(this.tmp, function(obj){
                         var i;
@@ -378,6 +405,7 @@
         delete sort[keys[0]];
         for(var prop in sort){
             if(sort.hasOwnProperty(prop)){
+                this._addOp('sort');
                 sorted = sorted.thenBy(prop, sort[prop]);
             }
         }
@@ -440,6 +468,7 @@
      * @return {array}
      */
     JSQL.prototype.limit = function(limit, offset){
+        this._addOp('limit');
         offset = offset || 0;
         this.tmp = this.tmp.slice(0 + offset, limit + offset);
         return this;
@@ -453,6 +482,7 @@
      * @return {object}
      */
     JSQL.prototype.in = function(key, val){
+        this._addOp('in');
         this.tmp = this._filter(this.tmp, function(obj){
             return val.indexOf(obj[key]) !== -1;
         });
@@ -467,6 +497,7 @@
      * @return {object}
      */
     JSQL.prototype.notIn = function(key, val){
+        this._addOp('notIn');
         this.tmp = this._filter(this.tmp, function(obj){
             return val.indexOf(obj[key]) === -1;
         });
@@ -484,6 +515,7 @@
      * @return {object}
      */
     JSQL.prototype.between = function(key, min, max, exclusive){
+        this._addOp('between');
         if(exclusive){
             this.tmp = this._filter(this.tmp, function(obj){
                 return min < obj[key] && obj[key] < max;
@@ -507,6 +539,7 @@
      * @return {object}
      */
     JSQL.prototype.regEx = function(key, regex, i){
+        this._addOp('regex');
         // case insensitive
         var regexObj;
         if(i){
@@ -543,6 +576,7 @@
      * @return {object}
      */
     JSQL.prototype.startsWith = function(key, val){
+        this._addOp('startsWith');
         val = this._escapeRegex(val);
         this.regEx(key, '^' + val, true);
         return this;
@@ -556,6 +590,7 @@
      * @return {object}
      */
     JSQL.prototype.endsWith = function(key, val){
+        this._addOp('endsWith');
         val = this._escapeRegex(val);
         this.regEx(key, val + '$', true);
         return this;
@@ -569,6 +604,7 @@
      * @return {object}
      */
     JSQL.prototype.like = function(key, val){
+        this._addOp('like');
         val = this._escapeRegex(val);
         this.regEx(key, val, true);
         return this;
@@ -582,6 +618,7 @@
      * @return {object}
      */
     JSQL.prototype.lt = function(key, val){
+        this._addOp('lt');
         this.tmp = this._filter(this.tmp, function(obj){
             return obj[key] < val;
         });
@@ -596,6 +633,7 @@
       * @return {object}
       */
     JSQL.prototype.gt = function(key, val){
+        this._addOp('gt');
         this.tmp = this._filter(this.tmp, function(obj){
             return obj[key] > val;
         });
@@ -610,6 +648,7 @@
       * @return {object}
       */
     JSQL.prototype.lte = function(key, val){
+        this._addOp('lte');
         this.tmp = this._filter(this.tmp, function(obj){
             return obj[key] <= val;
         });
@@ -624,6 +663,7 @@
       * @return {object}
       */
     JSQL.prototype.gte = function(key, val){
+        this._addOp('gte');
         this.tmp = this._filter(this.tmp, function(obj){
             return obj[key] >= val;
         });
@@ -639,6 +679,7 @@
      * @return {object}
      */
     JSQL.prototype.transform = function(key, callback){
+        this._addOp('transform');
         this.tmp = this._filter(this.tmp, function(obj){
             obj[key] = callback(obj);
             return obj;
@@ -666,6 +707,7 @@
         }
 
         if(this.query.distinct){
+            this._addOp('distinct');
             finalVal = this._getUnique(this._filter(this._pluck(finalVal, this.query.distinct), function(item){
                 if(item === undefined){
                     return false;
@@ -715,8 +757,13 @@
      * @return {void}
      */
     JSQL.prototype._reset = function(){
-        this.tmp = (function(val){return val})(this.data);
+        this.tmp = this.data;
         this.query = {
+            stats: {
+                count: this.data.length,
+                operations: []
+            },
+            options: {},
             select: [],
             distinct: undefined,
             sort: {}
