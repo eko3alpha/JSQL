@@ -28,6 +28,7 @@
 
     /**
      * Utility to merge defaults with user options
+     *
      * @private
      * @param {Object} defaults Default settings
      * @param {Object} options User options
@@ -52,6 +53,7 @@
     /**
      * Utility to search a collection of objects
      * that match passed properties
+     *
      * @private
      * @param  {array} collection array of objects
      * @param  {object} property   object containing properties to search
@@ -72,6 +74,7 @@
 
     /**
      * Utility to check if value is empty object
+     *
      * @private
      * @param  {mixed}  value value to check
      * @return {Boolean}
@@ -85,6 +88,7 @@
 
     /**
      * Gets an array of unique values
+     *
      * @param  {array} list array to extract uniques
      * @return {array}      unique values
      */
@@ -102,6 +106,7 @@
     /**
      * Creates a new array with all elements
      * that pass the test implemented by the provided function.
+     *
      * @private
      * @param  {[type]}   list     [description]
      * @param  {Function} callback [description]
@@ -121,6 +126,7 @@
 
     /**
      * Mapping function
+     *
      * @private
      * @param  {array}   list     list of values
      * @param  {Function} callback function to execute on every value
@@ -138,6 +144,7 @@
 
     /**
      * Extracts the given keys
+     *
      * @private
      * @param  {array} list list of objects
      * @param  {string} key  property to extract
@@ -156,6 +163,7 @@
     /**
      * Extracts the properties given from
      * objects.  Select implementation
+     *
      * @param  {array} list list of objects
      * @param  {array} keys properties to extract
      * @return {object}
@@ -175,6 +183,7 @@
 
     /**
      * Adds operation to queue
+     *
      * @private
      * @return {void}
      */
@@ -184,6 +193,7 @@
 
     /**
      * Returns stats related to query
+     *
      * @public
      * @returns {Object}
      */
@@ -193,6 +203,7 @@
 
     /**
      * Query options
+     *
      * @param  {object} options options
      * @return {void}
      */
@@ -204,6 +215,7 @@
      * Similiar to SELECT in SQL
      * will filter out only the properties passed
      * as arguments
+     *
      * @public
      * @return {string} 0 or many string arguments allowed
      */
@@ -267,6 +279,8 @@
     /**
      * Returns objects with any property that contains
      * the value given, truthy ( == )
+     *
+     * @public
      * @param  {mixed} val value to test against
      * @return {object}
      */
@@ -287,6 +301,7 @@
 
     /**
      * Checks if all elmeents are objects {}
+     *
      * @private
      * @param  {array} list collection of items
      * @return {boolean}
@@ -310,6 +325,7 @@
 
     /**
      * Or where clause
+     *
      * @public
      * @param  {array} val objects containing where clauses
      * @return {object}
@@ -332,6 +348,7 @@
     /**
      * Similiar to a JOIN however it will merge only
      * the given items
+     *
      * @public
      * @param  {number|string} leftKey    key to match
      * @param  {array} collection collection to join on
@@ -360,6 +377,7 @@
 
     /**
      * Sets the sorting values for later processing
+     *
      * @public
      * @param  {string} key  key to sort on
      * @param  {string|undefined} sort what sorting type to use
@@ -389,6 +407,7 @@
 
     /**
      * Adds entry for sorting key to asc
+     *
      * @public
      * @param  {string} val key to sort on
      * @return {object}
@@ -400,6 +419,7 @@
 
     /**
      * Adds entry for sorting key to desc
+     *
      * @public
      * @param  {string} val key to sort on
      * @return {object}
@@ -411,6 +431,7 @@
 
     /**
      * Implementation of the sorting
+     *
      * @private
      * @param  {array} list list to sort on
      * @param  {object} sort object containing sort criteria
@@ -483,6 +504,7 @@
 
     /**
      * Constrains the number of items in a result set
+     *
      * @public
      * @param  {integer} limit  maximum number of objects to return
      * @param  {integer} offset the offset of the first object to return
@@ -497,6 +519,7 @@
 
     /**
      * Checks if value is in an array set
+     *
      * @public
      * @param  {string} key property to test
      * @param  {array} val array set to check in
@@ -512,6 +535,7 @@
 
     /**
      * Checks if value is not in an array set
+     *
      * @public
      * @param  {string} key property to test
      * @param  {array} val array set to check in
@@ -528,6 +552,7 @@
     /**
      * Retrieve values within a range
      * default is inclusive
+     *
      * @public
      * @param  {string} key property to check
      * @param  {integer} min minimum value
@@ -553,6 +578,7 @@
 
     /**
      * Regular Expression search
+     *
      * @public
      * @param  {string} key   key property to check
      * @param  {regEx} regex regular exression /expression/
@@ -581,6 +607,7 @@
 
     /**
      * Gets string version of escaped regular expression
+     *
      * @private
      * @param  {string} val string regular expression
      * @return {string}     escaped regex as string
@@ -591,6 +618,7 @@
 
     /**
      * Gets objects that have property that starts with value
+     *
      * @public
      * @param  {string} key property name
      * @param  {string} val string fragment
@@ -605,6 +633,7 @@
 
     /**
      * Gets objects that have property that ends with value
+     *
      * @public
      * @param  {string} key property name
      * @param  {string} val string fragment
@@ -619,6 +648,7 @@
 
     /**
      * Gets objects that have property that contains value
+     *
      * @public
      * @param  {string} key property name
      * @param  {string} val string fragment
@@ -633,6 +663,7 @@
 
     /**
      * Less than
+     *
      * @public
      * @param  {string} key property name
      * @param  {number} val number to test against
@@ -648,6 +679,7 @@
 
     /**
       * Greater than
+      *
       * @public
       * @param  {string} key property name
       * @param  {number} val number to test against
@@ -663,6 +695,7 @@
 
     /**
       * Less than or equal to
+      *
       * @public
       * @param  {string} key property name
       * @param  {number} val number to test against
@@ -678,6 +711,7 @@
 
     /**
       * Greater than or equal to
+      *
       * @public
       * @param  {string} key property name
       * @param  {number} val number to test against
@@ -694,6 +728,7 @@
     /**
      * Allows you to set new property values,
      * object is accessible within the callback
+     *
      * @public
      * @param  {Function} callback function to execute
      * @return {object}
@@ -711,6 +746,7 @@
     /**
      * Returns value of internal collection
      * applying rules
+     *
      * @public
      * @return {array}
      */
@@ -741,6 +777,7 @@
     /**
      * Returns the first object in collection
      * after rules have been applied
+     *
      * @public
      * @return {object}
      */
@@ -751,6 +788,7 @@
     /**
      * Returns count of objects at
      * any given point in the query
+     *
      * @public
      * @return {integer}
      */
@@ -761,6 +799,7 @@
     /**
      * Sets unique values of a property to
      * extract once rules applied
+     *
      * @public
      * @param  {string} val property to get uniques from
      * @return {object}
@@ -773,6 +812,7 @@
     /**
      * Resets internal value
      * @private
+     *
      * @return {void}
      */
     JSQL.prototype._reset = function(){
