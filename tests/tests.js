@@ -486,6 +486,86 @@ var runTests = function(title, JSQL){
         assert.deepEqual(e.distinct('d').get(), [55], 'e.distinct(\'d\').get()');
     });
 
+   QUnit.test(title + 'contains()', function(assert){
+
+        var testData = [
+            {a: 'abc', b: 1},
+            {a: 'zed', b: 2345},
+            {a: 'cgw', b: 0},
+            {a: 'cde', b: '2345'},
+            {a: 'edf', b: '0'},
+            {a: 'dfg', b: '1'},
+            {a: 'dfg', b: 'String'},
+            {a: 'fgh', b: true},
+            {a: 'ghi', b: false},
+            {a: 'fgh', b: 'true'},
+            {a: 'ghi', b: 'false'},
+            {a: 'hij', b: null},
+            {a: 'ijk', b: undefined},
+            {a: 'jkl', b: []},
+            {a: 'klm', b: {}}
+        ];
+
+        var e = new JSQL(testData);
+
+        assert.deepEqual(e.select().contains(2345).get(),
+        [
+            {a: 'zed', b: 2345},
+            {a: 'cde', b: '2345'}
+        ], "e.select().contains(2345).get()");
+
+       assert.deepEqual(e.select().contains(null).get(),
+        [
+            {a: 'hij', b: null},
+            {a: 'ijk', b: undefined}
+        ], "e.select().contains(null).get()");
+
+        assert.deepEqual(e.select().contains('2345').get(),
+        [
+            {a: 'zed', b: 2345},
+            {a: 'cde', b: '2345'}
+        ], "e.select().contains('2345').get()");
+
+        assert.deepEqual(e.select().contains('abc').get(),
+        [
+            {a: 'abc', b: 1}
+        ], "e.select().contains('abc').get()");
+
+        assert.deepEqual(e.select().contains('xy').get(),
+        [
+        ], "e.select().contains('xy').get()");
+
+        assert.deepEqual(e.select().contains('1').get(),
+        [
+            {a: 'abc', b: 1},
+            {a: 'dfg', b: '1'},
+            {a: 'fgh', b: true}
+        ], "e.select().contains('1').get()");
+
+        assert.deepEqual(e.select().contains(1).get(),
+        [
+            {a: 'abc', b: 1},
+            {a: 'dfg', b: '1'},
+            {a: 'fgh', b: true}
+        ], "e.select().contains('1').get()");
+
+        assert.deepEqual(e.select().contains(0).get(),
+        [
+            {a: 'cgw', b: 0},
+            {a: 'edf', b: '0'},
+            {a: 'ghi', b: false},
+            {a: 'jkl', b: []}
+        ], "e.select().contains(0).get()");
+
+        assert.deepEqual(e.select().contains(true).get(),
+        [
+          {"a": "abc", "b": 1 },
+          {"a": "dfg", "b": "1"},
+          {"a": "fgh", "b": true}
+        ], "e.select().contains(true).get()");
+
+   });
+
    QUnit.test(title + 'transform()', function(assert){
 
         var testData = [

@@ -251,7 +251,7 @@
 
         // where({a: 10})
         if(typeof val === 'object'){
-            this._addOp('where')
+            this._addOp('where');
             this.tmp = this._queryObj(this.tmp, val);
             return this;
         }
@@ -262,6 +262,27 @@
         }
 
         throw 'Invalid arguments for where clause';
+    };
+
+    /**
+     * Returns objects with any property that contains
+     * the value given, truthy ( == )
+     * @param  {mixed} val value to test against
+     * @return {object}
+     */
+    JSQL.prototype.contains = function(val){
+        this._addOp('contains');
+        this.tmp = this._filter(this.tmp, function(obj){
+            for(var prop in obj){
+                if(obj.hasOwnProperty(prop)){
+                    if(obj[prop] == val){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        });
+        return this;
     };
 
     /**
