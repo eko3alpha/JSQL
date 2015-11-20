@@ -12,10 +12,9 @@ var runTests = function(title, JSQL, data){
         var e = new JSQL(data);
 
         assert.notEqual(
-            e.transform('full', function(obj){
-                return obj.first + ' ' + obj.last;
-            })
-            , [],
+            e.transform(function(obj){
+                obj.full = obj.first + ' ' + obj.last;
+            }), [],
             "e.transform()"
         );
 
