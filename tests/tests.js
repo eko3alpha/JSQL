@@ -2,6 +2,32 @@
 'use strict';
 var runTests = function(title, JSQL){
 
+    QUnit.test(title + 'options()', function(assert){
+        var testData = {ignoreEmptyString: true};
+
+        var e = new JSQL([]);
+        e.options(testData);
+        assert.deepEqual(e.query.options, {ignoreEmptyString: true}, 'e.options({ignoreEmptyString: true})');
+        assert.deepEqual(e._getOpt('ignoreEmptyString'), true, "e._getOpt('ignoreEmptyString')");
+        assert.deepEqual(e.select()._getOpt('ignoreEmptyString'), undefined, ".select()._getOpt('ignoreEmptyString')");
+    });
+
+    QUnit.test(title + 'options({ignoreEmptyString: true})', function(assert){
+        var testData = [
+            {'a': 1, 'b': 'pa'},
+            {'a': 2, 'b': 'dc'},
+            {'a': 3, 'b': 'ca'},
+        ];
+/*            // remove all properties containing white space
+            if(this._getOpt('ignoreEmptyString')){
+                property = this._stripEmptyProps(property);
+            }
+*/
+        var e = new JSQL(testData);
+        assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'b': ''}, {'a': 1, 'b': ''}).get(), [{'a': 1, 'b': 'pa'}], 'e.select().where({\'a\': 1}).get()');
+        e.debug();
+    });
+
     QUnit.test(title + 'select()', function(assert){
         var testData = [
             {'a': 1, 'b': 100, 'c': 23},
@@ -22,6 +48,7 @@ var runTests = function(title, JSQL){
             {'a': 2, 'b': 'dc'},
             {'a': 3, 'b': 'ca'},
         ];
+
         var e = new JSQL(testData);
         assert.deepEqual(e.select().where({'a': 1}).get(), [{'a': 1, 'b': 'pa'}], 'e.select().where({\'a\': 1}).get()');
         assert.deepEqual(e.select().where({'a': 5}).get(), [], 'e.select().where({\'a\': 5}).get()');
@@ -55,7 +82,6 @@ var runTests = function(title, JSQL){
         assert.deepEqual(e.select().where({'a': 5}).get(), [], 'e.select().where({\'a\': 5}).get()');
         assert.deepEqual(e.select().where({'a': ''}).get(), [], 'e.select().where({\'a\': \'\'}).get()');
         assert.deepEqual(e.select().where({'h': ''}).get(), [], 'e.select().where({\'a\': \'\'}).get()');
-
     });
 
     QUnit.test(title + 'orWhere()', function(assert){
@@ -749,8 +775,19 @@ var runTests = function(title, JSQL){
         assert.deepEqual(e._areAllObjects([{}, '1']), false, '[{}, "1"]');
     });
 
+    QUnit.test(title + '_stripEmptyProps()', function(assert){
+
+        var e = new JSQL([]);
+        assert.deepEqual(e._stripEmptyProps({'a': '', 'b': 'test'}), {'b': 'test'}, "e.stripEmptyProps({'a': '', 'b': 'test'})");
+        assert.deepEqual(e._stripEmptyProps({'a': 'test', 'b': 'test'}), {'a': 'test', 'b': 'test'}, "._stripEmptyProps({'a': 'test', 'b': 'test'})");
+        assert.deepEqual(e._stripEmptyProps({'a': '', 'b': ''}), {}, "._stripEmptyProps({'a': 'test', 'b': 'test'})");
+
+    });
+
+
+
 };
 
 runTests('', JSQL);
-runTests('Minified : ', JSQLMIN);
+//runTests('Minified : ', JSQLMIN);
 

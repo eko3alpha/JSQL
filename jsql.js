@@ -15,11 +15,13 @@
         this.tmp  = value;
 
         this.query = {
-            stats: {
+            debug: {
                 count: value.length,
                 operations: []
             },
-            options: {},
+            options: {
+                ignoreEmptyString: false
+            },
             select: [],
             distinct: undefined,
             sort: {}
@@ -158,7 +160,7 @@
             plucked.push(list[i][key]);
         }
         return plucked;
-    }
+    };
 
     /**
      * Extracts the properties given from
@@ -182,14 +184,34 @@
     };
 
     /**
+     * Removes any properties with empty strings
+     * from the seraches, based off of the
+     * ignoreEmptyString option setting
+     * @param  {object} obj object to strip
+     * @return {object}
+     */
+
+    JSQL.prototype._stripEmptyProps = function(obj){
+        var clean = {};
+        for(var prop in obj){
+            if(obj.hasOwnProperty(prop)){
+                if(obj[prop] !== ''){
+                    clean[prop] = obj[prop];
+                }
+            }
+        }
+        return clean;
+    };
+
+    /**
      * Adds operation to queue
      *
      * @private
      * @return {void}
      */
     JSQL.prototype._addOp = function(op){
-        this.query.stats.operations.push(op);
-    }
+        this.query.debug.operations.push(op);
+    };
 
     /**
      * Returns stats related to query
@@ -197,8 +219,9 @@
      * @public
      * @returns {Object}
      */
-    JSQL.prototype.getStats = function(){
-        return this.query.stats;
+    JSQL.prototype.debug = function(){
+        console.log(this.query.debug);
+        return this.query.debug;
     };
 
     /**
@@ -208,7 +231,19 @@
      * @return {void}
      */
     JSQL.prototype.options = function(options){
-        this.options = this._extend(this.options, options);
+        this.query.options = this._extend(this.query.options, options);
+        return this;
+    };
+
+    /**
+     * Returns the option value
+     * @private
+     * @param  {string} option option key
+     * @return {mixed}
+     */
+
+    JSQL.prototype._getOpt = function(option){
+        return this.query.options[option];
     };
 
     /**
@@ -220,8 +255,8 @@
      * @return {string} 0 or many string arguments allowed
      */
     JSQL.prototype.select = function(){
-        this._reset();
         this._addOp('select');
+        this._reset();
         this.query.select = arguments;
         return this;
     };
@@ -331,7 +366,7 @@
      * @return {object}
      */
     JSQL.prototype.orWhere = function(val){
-        this._addOp('where');
+        this._addOp('orWhere');
         var self = this;
         this.tmp = this._filter(this.tmp, function(obj){
                         var i;
@@ -341,6 +376,7 @@
                                 return true;
                             }
                         }
+                        return false;
                     });
         return this;
     };
@@ -818,7 +854,7 @@
     JSQL.prototype._reset = function(){
         this.tmp = this.data;
         this.query = {
-            stats: {
+            debug: {
                 count: this.data.length,
                 operations: []
             },
