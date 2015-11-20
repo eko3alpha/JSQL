@@ -127,13 +127,13 @@
      * @return {mixed}
      */
     JSQL.prototype._map = function(list, callback){
-        var transformed = [];
+        var mapped = [];
         var i;
         var len = list.length;
         for(i = 0; i < len; i++){
-            transformed.push(callback(list[i]));
+            mapped.push(callback(list[i]));
         }
-        return transformed;
+        return mapped;
     };
 
     /**
@@ -671,23 +671,21 @@
     };
 
     /**
-     * Sets property to callback value,
+     * Allows you to set new property values,
      * object is accessible within the callback
      * @public
-     * @param  {string}   key      property to set
-     * @param  {Function} callback callback to execute
+     * @param  {Function} callback function to execute
      * @return {object}
      */
-    JSQL.prototype.transform = function(key, callback){
+    JSQL.prototype.transform = function(callback){
         this._addOp('transform');
-        this.tmp = this._filter(this.tmp, function(obj){
-            obj[key] = callback(obj);
-            return obj;
-        });
+        var i = 0;
+        var len = this.tmp.length;
+        for(i = 0 ; i < len; i++){
+            callback(this.tmp[i]);
+        }
         return this;
     };
-
-    /* output */
 
     /**
      * Returns value of internal collection

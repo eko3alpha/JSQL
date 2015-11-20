@@ -495,23 +495,23 @@ var runTests = function(title, JSQL){
 
         var e = new JSQL(testData);
 
-        assert.deepEqual(e.select().transform('b', function(obj){ return obj['b'] * 10}).get(),
+        assert.deepEqual(e.transform(function(obj){ obj.b = obj.b * 10}).get(),
         [
             {a: 'abc', b: 990},
             {a: 'xyz', b: 100}
-        ], "e.select().transform('b', function(obj) return obj.b * 10}).get()");
+        ], "e.transform(function(obj){ obj.b = obj.b * 10}).get()");
 
-        assert.deepEqual(e.select().transform('a', function(obj){ return obj['a'].toUpperCase()}).get(),
+        assert.deepEqual(e.transform(function(obj){ obj.a = obj.a.toUpperCase()}).get(),
         [
             {a: 'ABC', b: 990},
             {a: 'XYZ', b: 100}
-        ], "e.select().transform('b', function(obj) { return obj['a'].toUpperCase()}).get()");
+        ], "e.transform(function(obj){ obj.a = obj.a.toUpperCase()}).get()");
 
-       assert.deepEqual(e.select().transform('c', function(obj){ return obj['a']+obj['b']}).get(),
+       assert.deepEqual(e.transform(function(obj){ obj.c = obj.a + obj.b }).get(),
         [
             {a: 'ABC', b: 990, c: 'ABC990'},
             {a: 'XYZ', b: 100, c: 'XYZ100'}
-        ], "e.select().transform('c', function(obj){ return obj['a']+obj['b']}).get()");
+        ], "e.transform(function(obj){ obj.c = obj.a + obj.b }).get()");
 
     });
 
@@ -524,7 +524,6 @@ var runTests = function(title, JSQL){
         assert.deepEqual(e.get(), testData, 'e.get()');
 
     });
-
 
     QUnit.test(title + 'getOne()', function(assert){
         var testData = [
