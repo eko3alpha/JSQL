@@ -17,15 +17,16 @@ var runTests = function(title, JSQL){
             {'a': 1, 'b': 'pa'},
             {'a': 2, 'b': 'dc'},
             {'a': 3, 'b': 'ca'},
+            {'a': 4, 'b': ' '},
         ];
-/*            // remove all properties containing white space
-            if(this._getOpt('ignoreEmptyString')){
-                property = this._stripEmptyProps(property);
-            }
-*/
+
         var e = new JSQL(testData);
-        assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'b': ''}, {'a': 1, 'b': ''}).get(), [{'a': 1, 'b': 'pa'}], 'e.select().where({\'a\': 1}).get()');
-        e.debug();
+        assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'a':3, 'b': 'ca'}, {'b': ''}).get(),[{'a':3, 'b': 'ca'}],".where({'a':3, 'b': 'ca'}, {'b': ''})");
+        assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'a':1}, {'b': ' '}).get(),[{'a': 1, 'b': 'pa'}],".where({'a':3, 'b': 'ca'}, {'b': ' '}");
+       // assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'a':2, 'b': 'dc'}, {'b': 0}).get(),[{'a':2, 'b': 'dc'}],".where({'a':2, 'b': 'dc'}, {'b': 0}");
+
+
+
     });
 
     QUnit.test(title + 'select()', function(assert){
@@ -50,7 +51,10 @@ var runTests = function(title, JSQL){
         ];
 
         var e = new JSQL(testData);
-        assert.deepEqual(e.select().where({'a': 1}).get(), [{'a': 1, 'b': 'pa'}], 'e.select().where({\'a\': 1}).get()');
+
+        assert.deepEqual(e.select().where().get(), testData, 'e.select().where().get()');
+        assert.deepEqual(e.select().where([]).get(), testData, 'e.select().where([]).get()');
+        assert.deepEqual(e.select().where({'a': 1}).get(), [{'a': 1, 'b': 'pa'}], "e.select().where({'a': 1}).get()");
         assert.deepEqual(e.select().where({'a': 5}).get(), [], 'e.select().where({\'a\': 5}).get()');
         assert.deepEqual(e.select().where({'a': '1'}).get(), [{'a': 1, 'b': 'pa'}], 'e.select().where({\'a\': \'1\'}).get()');
         assert.deepEqual(e.select().where({'a': '5'}).get(), [], 'e.select().where({\'a\': \'5\'}).get()');
@@ -58,7 +62,13 @@ var runTests = function(title, JSQL){
         assert.deepEqual(e.select().where('bb', 5).get(), [], 'e.select().where(\'bb\', 5).get()');
         assert.deepEqual(e.select().where({'a': ''}).get(), [], 'e.select().where({\'a\': \'\'}).get()');
         assert.deepEqual(e.select().where({'h': ''}).get(), [], 'e.select().where({\'a\': \'\'}).get()');
-        assert.throws(function(){e.select().where(4)});
+        assert.throws(function(){e.select().where(4).get()});
+        assert.throws(function(){e.select().where(true).get()});
+        assert.throws(function(){e.select().where(null).get()});
+        assert.throws(function(){e.select().where(undefined).get()});
+        assert.throws(function(){e.select().where(1).get()});
+        assert.throws(function(){e.select().where(0).get()});
+        assert.throws(function(){e.select().where(false).get()});
 
         var testData = [
             {'a': 1, 'b': 'pa'},
@@ -67,7 +77,7 @@ var runTests = function(title, JSQL){
             {'a': 3, 'b': 'ca'},
         ];
         var e = new JSQL(testData);
-        assert.deepEqual(e.select().where({'a': 2}, {'a': 3}, {'b': 'pa'}).get(), [{'a': 1, 'b': 'pa'}, {'a': 2, 'b': 'dc'}, {'a': 3, 'b': 'ca'}], 'e.select().where({\'a\': 2}, {\'a\': 3}, {\'b\': \'pa\'}).get()');
+       // assert.deepEqual(e.select().where({'a': 2}, {'a': 3}, {'b': 'pa'}).get(), [{'a': 1, 'b': 'pa'}, {'a': 2, 'b': 'dc'}, {'a': 3, 'b': 'ca'}], 'e.select().where({\'a\': 2}, {\'a\': 3}, {\'b\': \'pa\'}).get()');
         assert.deepEqual(e.select().where([{'a': 1}]).get(), [{'a': 1, 'b': 'pa'}, {'a': 1, 'b': 'dd'}], 'e.select().where([{\'a\': 1}]).get()');
         assert.deepEqual(e.select().where([{'a': 2}, {'a': 3}]).get(), [{'a': 2, 'b': 'dc'}, {'a': 3, 'b': 'ca'}], 'e.select().where([{\'a\': 2}, {\'a\': 3}]).get()');
         assert.deepEqual(e.select().where({'a': 5}).get(), [], 'e.select().where({\'a\': 5}).get()');
@@ -734,7 +744,7 @@ var runTests = function(title, JSQL){
             {'a': 2, 'b': 44.3, 'c': 2},
             {'a': 0, 'b': 44.3, 'c': 2},
             {'a': null, 'b': 44.3, 'c': 2},
-            {'a': 3, 'b': -87.3, 'c': 'u'},
+            {'a': 3, 'b': -87.3, 'c': 'u'}
         ];
         var e = new JSQL([]);
 
@@ -749,8 +759,18 @@ var runTests = function(title, JSQL){
         assert.deepEqual(
             e._queryObj(testData, {'a': 0})
         , [{'a': 0, 'b': 44.3, 'c': 2}], '_queryObj(testData, {\'a\': 0})');
-    });
 
+        assert.deepEqual(
+            e._queryObj(testData, {'a': '0'})
+        , [{'a': 0, 'b': 44.3, 'c': 2}], "{'a': '0'}");
+
+
+
+        assert.deepEqual(
+            e._queryObj(testData, {})
+        , [], 'empty object returns empty array, matches nothing');
+
+    });
 
     QUnit.test(title + '_areAllObjects()', function(assert){
         var testData = [{'a': 'b', 'c': [1,2,3]}, {}, []];
@@ -778,9 +798,41 @@ var runTests = function(title, JSQL){
     QUnit.test(title + '_stripEmptyProps()', function(assert){
 
         var e = new JSQL([]);
-        assert.deepEqual(e._stripEmptyProps({'a': '', 'b': 'test'}), {'b': 'test'}, "e.stripEmptyProps({'a': '', 'b': 'test'})");
-        assert.deepEqual(e._stripEmptyProps({'a': 'test', 'b': 'test'}), {'a': 'test', 'b': 'test'}, "._stripEmptyProps({'a': 'test', 'b': 'test'})");
-        assert.deepEqual(e._stripEmptyProps({'a': '', 'b': ''}), {}, "._stripEmptyProps({'a': 'test', 'b': 'test'})");
+        assert.deepEqual(e._stripEmptyProps({
+            'a': 0,
+            'b': 1,
+            'c': true,
+            'd': false,
+            'e': null,
+            'f': undefined,
+            'g': '0',
+            'h': '1',
+            'i': 'test',
+            'j': '       ',
+            'k': ''
+         }), {
+            'a': 0,
+            'b': 1,
+            'c': true,
+            'd': false,
+            'e': null,
+            'f': undefined,
+            'g': '0',
+            'h': '1',
+            'i': 'test'
+        }, "strip blank/empty strings");
+
+        assert.deepEqual(e._stripEmptyProps({
+            'j': '       ',
+            'k': ''
+         }), {}, "return empty object");
+
+    });
+
+    QUnit.test(title + '_isObjectEmpty()', function(assert){
+        var e = new JSQL([]);
+        assert.deepEqual(e._isObjectEmpty({'a': '', 'b': 'test'}), false, "e._isObjectEmpty({'a': '', 'b': 'test'}");
+        assert.deepEqual(e._isObjectEmpty({}), true, "e._isObjectEmpty({})");
 
     });
 
@@ -789,5 +841,5 @@ var runTests = function(title, JSQL){
 };
 
 runTests('', JSQL);
-//runTests('Minified : ', JSQLMIN);
+runTests('Minified : ', JSQLMIN);
 

@@ -62,14 +62,24 @@
      * @return {array}            collection of matched objects
      */
     JSQL.prototype._queryObj = function(collection, property){
+        //console.log('filter query', property);
+        //console.log('filter over collection', collection[0]);
+
+        if(this._isObjectEmpty(property)){
+            return [];
+        }
+
         return this._filter(collection, function(obj){
             for(var prop in property){
                 if(property.hasOwnProperty(prop)){
+                    //console.log(obj, obj[prop], '!=', property[prop]);
                     if(obj[prop] != property[prop]){
+                        //console.log('REJECT', obj);
                         return false;
                     }
                 }
             }
+            //console.log('PASS', obj);
             return true;
         });
     };
@@ -81,11 +91,13 @@
      * @param  {mixed}  value value to check
      * @return {Boolean}
      */
-    JSQL.prototype._isObjectEmpty = function(value){
-        if(value === {}){
-            return true;
+    JSQL.prototype._isObjectEmpty = function(obj){
+        for(var prop in obj) {
+            if(obj.hasOwnProperty(prop)){
+                return false;
+            }
         }
-        return false;
+        return true;
     };
 
     /**
@@ -185,8 +197,10 @@
 
     /**
      * Removes any properties with empty strings
+     * or strings with white spaces
      * from the seraches, based off of the
-     * ignoreEmptyString option setting
+     * ignoreEmptyString implementation
+     * @private
      * @param  {object} obj object to strip
      * @return {object}
      */
@@ -195,12 +209,21 @@
         var clean = {};
         for(var prop in obj){
             if(obj.hasOwnProperty(prop)){
-                if(obj[prop] !== ''){
+               if(typeof obj[prop] !== 'string' || obj[prop].trim() !== ''){
                     clean[prop] = obj[prop];
                 }
             }
         }
         return clean;
+    };
+
+    JSQL.prototype._stripEmptyPropsFromCollection = function(list){
+        var i = 0;
+        var len = list.length;
+        for(i=0; i<len; i++){
+            list[i] = this._stripEmptyProps(list[i]);
+        }
+        return list;
     };
 
     /**
@@ -220,7 +243,7 @@
      * @returns {Object}
      */
     JSQL.prototype.debug = function(){
-        console.log(this.query.debug);
+        //console.log(this.query.debug);
         return this.query.debug;
     };
 
@@ -233,6 +256,16 @@
     JSQL.prototype.options = function(options){
         this.query.options = this._extend(this.query.options, options);
         return this;
+    };
+
+    JSQL.prototype._applyOptions = function(args){
+
+        // apply ignore empty string
+        if(this._getOpt('ignoreEmptyString')){
+            args = this._stripEmptyPropsFromCollection(args);
+        }
+
+        return args;
     };
 
     /**
@@ -273,40 +306,71 @@
      * @param  {string|number}
      * @return {object}
      */
-    JSQL.prototype.where = function(val){
+    JSQL.prototype.where = function(){
 
-        // where({a: 10} , {a:12, b:23})
-        if(arguments.length > 1 && this._areAllObjects(arguments)){
-            this.orWhere(arguments);
+        var args = arguments;
+//console.log("------------------------------");
+//console.log('data:', this.data);
+//console.log('tmp:', this.tmp);
+//console.log('arguments:', args);
+//console.log('type:', typeof args);
+//console.log('empty', this._isObjectEmpty(args))
+        // no arguments
+        if(args.length === 0){
             return this;
         }
 
+        // empty array passed
+        if(args.length === 1 && args[0].length === 0){
+            return this;
+        }
+
+//console.log('length', args.length)
+//console.log(1)
         // where('a', 44)
-        if(arguments.length === 2 && typeof arguments[0] === 'string'){
-            this._addOp('where')
+        if(args.length === 2 && typeof args[0] === 'string'){
+           /* this._addOp('where');
             var obj = {};
             obj[arguments[0]] = arguments[1];
+            obj = this._stripEmptyProps(obj, this._getOpt('ignoreEmptyString'));
             this.tmp = this._queryObj(this.tmp, obj);
+            return this;*/
+            args = {};
+            args[arguments[0]] = arguments[1];
+            args = [args]
+        }
+//console.log(2)
+
+        args = this._applyOptions(args);
+
+        // where({a: 10} , {a:12, b:23})
+        if(args.length > 1 && this._areAllObjects(args)){
+            this.orWhere(args);
             return this;
         }
+//console.log(3)
 
         // where([{a: 10} , {a:12, b:23}])
-        if(Array.isArray(val)){
-            this.orWhere(val);
+        if(Array.isArray(args[0])){
+            this.orWhere(args[0]);
             return this;
         }
 
+        if(this._isObjectEmpty(args)){
+            return this;
+        }
+
+//console.log(4)
+//console.log('data:', this.data);
+//console.log('tmp:', this.tmp);
         // where({a: 10})
-        if(typeof val === 'object'){
+        if(typeof args[0] === 'object'){
             this._addOp('where');
-            this.tmp = this._queryObj(this.tmp, val);
+            this.tmp = this._queryObj(this.tmp, args[0]);
             return this;
         }
 
-        // no arguments
-        if(arguments.length === 0){
-            return this;
-        }
+//console.log(5)
 
         throw 'Invalid arguments for where clause';
     };
