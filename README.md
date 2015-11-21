@@ -1,7 +1,7 @@
 # JSQL
 JSQL allows you to dynamically build queries to run against a collection of objects in a very human readable syntax.  It's perfect for filtering/sorting table data.
 
-[WIKI](/eko3alpha/JSQL/wiki)
+[WIKI](https://github.com/eko3alpha/JSQL/wiki)
 
 Quick Start:
 ------
