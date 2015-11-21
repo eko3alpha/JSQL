@@ -5,7 +5,7 @@ Quick Start:
 ------
 
 This is the data used for the following examples.
-````
+```javascript
     var data = [
           { "name": "Portia Zamora", "age": 48, "city": "Morkhoven" },
           { "name": "Rahim Wiggins", "age": 42, "city": "Orlando" },
@@ -20,13 +20,13 @@ This is the data used for the following examples.
           { "name": "Shoshana Fox", "age": 62, "city": "Ludwigsfelde" },
           { "name": "Jack Gilbert", "age": 55, "city": "Parkland County" }
         ];
-````
+```
 Once you have the data you can create a new JSQL object.
-````
+```javascript
     var people = new JSQL(data);
-````
+```
 Here are some examples using slightly different syntax.
-````
+```javascript
     people
     .select()
     .where("age", "60")
@@ -81,7 +81,7 @@ Here are some examples using slightly different syntax.
 
     /* result */
     [28, 32, 40, 42, 48, 54, 55, 60, 61, 62]
-````
+```
 
 
 
