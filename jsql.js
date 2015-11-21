@@ -62,9 +62,6 @@
      * @return {array}            collection of matched objects
      */
     JSQL.prototype._queryObj = function(collection, property){
-        //console.log('filter query', property);
-        //console.log('filter over collection', collection[0]);
-
         if(this._isObjectEmpty(property)){
             return [];
         }
@@ -72,14 +69,11 @@
         return this._filter(collection, function(obj){
             for(var prop in property){
                 if(property.hasOwnProperty(prop)){
-                    //console.log(obj, obj[prop], '!=', property[prop]);
-                    if(obj[prop] != property[prop]){
-                        //console.log('REJECT', obj);
+                    if(String(obj[prop]) !== String(property[prop])){
                         return false;
                     }
                 }
             }
-            //console.log('PASS', obj);
             return true;
         });
     };
@@ -243,7 +237,6 @@
      * @returns {Object}
      */
     JSQL.prototype.debug = function(){
-        //console.log(this.query.debug);
         return this.query.debug;
     };
 
@@ -279,6 +272,59 @@
         return this.query.options[option];
     };
 
+
+    JSQL.prototype._processArguments = function(args){
+
+        var info = { clause: 'VOID', args: undefined , type: 0};
+
+        // no arguments
+        if(args.length === 0){
+            info.type = 1;
+            return info;
+        }
+
+        // invalid arguments
+       if(args[0] === null || args[0] === undefined){
+            info.type = 2;
+            return info;
+        }
+
+        // unwrap array
+        if(args.length === 1 && Array.isArray(args[0])){
+            args = args[0];
+        }
+
+        // where({a: 10}) => [{a: 10}]
+        // where({}) => [{}]
+        if(args.length === 1 && typeof args[0] === 'object'){
+            info.args = args[0];
+            info.clause = 'AND';
+            info.type = 5;
+            return info;
+        }
+
+        // where('a', 44) => [{'a': 44}]
+        if(args.length === 2 && typeof args[0] === 'string'){
+            var newObj = {};
+            newObj[args[0]] = args[1];
+            info.args = newObj;
+            info.clause = 'AND';
+            info.type = 6;
+            return info;
+        }
+
+        // where({a: 10} , {a:12, b:23}) => [{a: 10} , {a:12, b:23}]
+        if(args.length > 1 && this._areAllObjects(args)){
+            info.args = args;
+            info.clause = 'OR';
+            info.type = 7;
+            return info;
+        }
+
+        info.type = 8;
+        return info;
+    };
+
     /**
      * Similiar to SELECT in SQL
      * will filter out only the properties passed
@@ -294,6 +340,9 @@
         return this;
     };
 
+
+
+
     /**
      * Where clause
      * ('a', 'b') : where 'a' = 'b'
@@ -308,71 +357,20 @@
      */
     JSQL.prototype.where = function(){
 
-        var args = arguments;
-//console.log("------------------------------");
-//console.log('data:', this.data);
-//console.log('tmp:', this.tmp);
-//console.log('arguments:', args);
-//console.log('type:', typeof args);
-//console.log('empty', this._isObjectEmpty(args))
-        // no arguments
-        if(args.length === 0){
+        var info = this._processArguments(arguments);
+        info.args = this._applyOptions(info.args);
+
+        if(info.clause === "AND"){
+            this.tmp = this._queryObj(this.tmp, info.args);
             return this;
         }
 
-        // empty array passed
-        if(args.length === 1 && args[0].length === 0){
+        if(info.clause === "OR"){
+            this._orWhere(info.args);
             return this;
         }
 
-//console.log('length', args.length)
-//console.log(1)
-        // where('a', 44)
-        if(args.length === 2 && typeof args[0] === 'string'){
-           /* this._addOp('where');
-            var obj = {};
-            obj[arguments[0]] = arguments[1];
-            obj = this._stripEmptyProps(obj, this._getOpt('ignoreEmptyString'));
-            this.tmp = this._queryObj(this.tmp, obj);
-            return this;*/
-            args = {};
-            args[arguments[0]] = arguments[1];
-            args = [args]
-        }
-//console.log(2)
-
-        args = this._applyOptions(args);
-
-        // where({a: 10} , {a:12, b:23})
-        if(args.length > 1 && this._areAllObjects(args)){
-            this.orWhere(args);
-            return this;
-        }
-//console.log(3)
-
-        // where([{a: 10} , {a:12, b:23}])
-        if(Array.isArray(args[0])){
-            this.orWhere(args[0]);
-            return this;
-        }
-
-        if(this._isObjectEmpty(args)){
-            return this;
-        }
-
-//console.log(4)
-//console.log('data:', this.data);
-//console.log('tmp:', this.tmp);
-        // where({a: 10})
-        if(typeof args[0] === 'object'){
-            this._addOp('where');
-            this.tmp = this._queryObj(this.tmp, args[0]);
-            return this;
-        }
-
-//console.log(5)
-
-        throw 'Invalid arguments for where clause';
+        return this;
     };
 
     /**
@@ -429,7 +427,7 @@
      * @param  {array} val objects containing where clauses
      * @return {object}
      */
-    JSQL.prototype.orWhere = function(val){
+    JSQL.prototype._orWhere = function(val){
         this._addOp('orWhere');
         var self = this;
         this.tmp = this._filter(this.tmp, function(obj){
@@ -442,37 +440,6 @@
                         }
                         return false;
                     });
-        return this;
-    };
-
-    /**
-     * Similiar to a JOIN however it will merge only
-     * the given items
-     *
-     * @public
-     * @param  {number|string} leftKey    key to match
-     * @param  {array} collection collection to join on
-     * @param  {string} oldKey     current key name in collection
-     * @param  {string} newKey     new key name for joined value
-     * @return {object}
-     */
-    JSQL.prototype.associate = function(leftKey, collection, oldKey, newKey){
-        var newCollection = [];
-        var i;
-        var len = this.tmp.length;
-        var val;
-        for(i = 0; i < len; i++){
-            val = this._queryObj(collection, {id: this.tmp[i][leftKey]});
-            if(val.length === 1){
-                this.tmp[i][newKey] = val[0][oldKey];
-            } else{
-                this.tmp[i][newKey] = undefined;
-            }
-            newCollection.push(this.tmp[i]);
-        }
-
-        this.tmp = newCollection;
-        return this;
     };
 
     /**
@@ -883,17 +850,6 @@
      */
     JSQL.prototype.getOne = function(){
         return this.get().slice(0, 1)[0];
-    };
-
-    /**
-     * Returns count of objects at
-     * any given point in the query
-     *
-     * @public
-     * @return {integer}
-     */
-    JSQL.prototype.count = function(){
-        return this.tmp.length;
     };
 
     /**

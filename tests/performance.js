@@ -19,9 +19,9 @@ var runTests = function(title, JSQL, data){
         );
 
         assert.notEqual(
-            e.select('first','age').orWhere([{'age': 18}, {'age': 66}]).get()
+            e.select('first','age').where([{'age': 18}, {'age': 66}]).get()
             , [],
-            "e.select('first','age').orWhere([{'age': 18}, {'age': 66}]).get()"
+            "e.select('first','age').where([{'age': 18}, {'age': 66}]).get()"
             );
 
         assert.notEqual(
@@ -53,7 +53,6 @@ var runTests = function(title, JSQL, data){
             ,[ ],
              "e.select('first', 'last').where({'last': 'Carson'}, {'last': 'Coleman'}).get()"
              );
-
     });
 
 };

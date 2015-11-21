@@ -23,9 +23,7 @@ var runTests = function(title, JSQL){
         var e = new JSQL(testData);
         assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'a':3, 'b': 'ca'}, {'b': ''}).get(),[{'a':3, 'b': 'ca'}],".where({'a':3, 'b': 'ca'}, {'b': ''})");
         assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'a':1}, {'b': ' '}).get(),[{'a': 1, 'b': 'pa'}],".where({'a':3, 'b': 'ca'}, {'b': ' '}");
-       // assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'a':2, 'b': 'dc'}, {'b': 0}).get(),[{'a':2, 'b': 'dc'}],".where({'a':2, 'b': 'dc'}, {'b': 0}");
-
-
+        assert.deepEqual(e.select().options({ignoreEmptyString: true}).where({'a':2, 'b': 'dc'}, {'b': 0}).get(),[{'a':2, 'b': 'dc'}],".where({'a':2, 'b': 'dc'}, {'b': 0}");
 
     });
 
@@ -62,13 +60,15 @@ var runTests = function(title, JSQL){
         assert.deepEqual(e.select().where('bb', 5).get(), [], 'e.select().where(\'bb\', 5).get()');
         assert.deepEqual(e.select().where({'a': ''}).get(), [], 'e.select().where({\'a\': \'\'}).get()');
         assert.deepEqual(e.select().where({'h': ''}).get(), [], 'e.select().where({\'a\': \'\'}).get()');
-        assert.throws(function(){e.select().where(4).get()});
-        assert.throws(function(){e.select().where(true).get()});
-        assert.throws(function(){e.select().where(null).get()});
-        assert.throws(function(){e.select().where(undefined).get()});
-        assert.throws(function(){e.select().where(1).get()});
-        assert.throws(function(){e.select().where(0).get()});
-        assert.throws(function(){e.select().where(false).get()});
+
+        assert.deepEqual(e.select().where(null).get(), testData);
+        assert.deepEqual(e.select().where(undefined).get(), testData);
+        assert.deepEqual(e.select().where(1).get(), testData);
+        assert.deepEqual(e.select().where(0).get(), testData);
+        assert.deepEqual(e.select().where(4).get(), testData);
+        assert.deepEqual(e.select().where('string').get(), testData);
+        assert.deepEqual(e.select().where(false).get(), testData);
+        assert.deepEqual(e.select().where(true).get(), testData);
 
         var testData = [
             {'a': 1, 'b': 'pa'},
@@ -77,7 +77,7 @@ var runTests = function(title, JSQL){
             {'a': 3, 'b': 'ca'},
         ];
         var e = new JSQL(testData);
-       // assert.deepEqual(e.select().where({'a': 2}, {'a': 3}, {'b': 'pa'}).get(), [{'a': 1, 'b': 'pa'}, {'a': 2, 'b': 'dc'}, {'a': 3, 'b': 'ca'}], 'e.select().where({\'a\': 2}, {\'a\': 3}, {\'b\': \'pa\'}).get()');
+        //assert.deepEqual(e.select().where({'a': 2}, {'a': 3}, {'b': 'pa'}).get(), [{'a': 1, 'b': 'pa'}, {'a': 2, 'b': 'dc'}, {'a': 3, 'b': 'ca'}], 'e.select().where({\'a\': 2}, {\'a\': 3}, {\'b\': \'pa\'}).get()');
         assert.deepEqual(e.select().where([{'a': 1}]).get(), [{'a': 1, 'b': 'pa'}, {'a': 1, 'b': 'dd'}], 'e.select().where([{\'a\': 1}]).get()');
         assert.deepEqual(e.select().where([{'a': 2}, {'a': 3}]).get(), [{'a': 2, 'b': 'dc'}, {'a': 3, 'b': 'ca'}], 'e.select().where([{\'a\': 2}, {\'a\': 3}]).get()');
         assert.deepEqual(e.select().where({'a': 5}).get(), [], 'e.select().where({\'a\': 5}).get()');
@@ -92,69 +92,6 @@ var runTests = function(title, JSQL){
         assert.deepEqual(e.select().where({'a': 5}).get(), [], 'e.select().where({\'a\': 5}).get()');
         assert.deepEqual(e.select().where({'a': ''}).get(), [], 'e.select().where({\'a\': \'\'}).get()');
         assert.deepEqual(e.select().where({'h': ''}).get(), [], 'e.select().where({\'a\': \'\'}).get()');
-    });
-
-    QUnit.test(title + 'orWhere()', function(assert){
-        var testData = [
-            {'a': 1, 'b': 'pa'},
-            {'a': 1, 'b': 'dd'},
-            {'a': 2, 'b': 'dc'},
-            {'a': 3, 'b': 'ca'},
-        ];
-        var e = new JSQL(testData);
-        assert.deepEqual(e.select().orWhere([{'a': 1}]).get(), [{'a': 1, 'b': 'pa'}, {'a': 1, 'b': 'dd'}], 'e.select().orWhere([{\'a\': 1}]).get()');
-        assert.deepEqual(e.select().orWhere([{'a': 2}, {'a': 3}]).get(), [{'a': 2, 'b': 'dc'}, {'a': 3, 'b': 'ca'}], 'e.select().orWhere([{\'a\': 2}, {\'a\': 3}]).get()');
-        assert.deepEqual(e.select().orWhere({'a': 5}).get(), [], 'e.select().orWhere({\'a\': 5}).get()');
-    });
-
-    QUnit.test(title + 'associate()', function(assert){
-
-        var testData = [
-            {'id': 1, 'statusId': 0},
-            {'id': 2, 'statusId': 1},
-            {'id': 3, 'statusId': 2},
-            ]
-
-        var statusData = [
-                {'id': 0, 'name': 'Deleted'},
-                {'id': 1, 'name': 'Active'},
-                {'id': 2, 'name': 'Pending'},
-            ];
-
-        var e = new JSQL(testData);
-
-        assert.deepEqual(e.select().associate('statusId', statusData, 'name', 'statName').get(), [
-
-            {'id': 1, 'statName': 'Deleted','statusId': 0},
-            {'id': 2, 'statName': 'Active','statusId': 1},
-            {'id': 3, 'statName': 'Pending','statusId': 2}
-
-            ],
-           'e.select().associate(\'statusId\', statusData, \'name\', \'statName\').get()');
-
-        var testData = [
-            {'id': 1, 'statusId': 0},
-            {'id': 2, 'statusId': 99},
-            {'id': 3, 'statusId': 2},
-            ]
-
-        var statusData = [
-                {'id': 0, 'name': 'Deleted'},
-                {'id': 1, 'name': 'Active'},
-                {'id': 2, 'name': 'Pending'},
-            ];
-
-        var e = new JSQL(testData);
-
-        assert.deepEqual(e.select().associate('statusId', statusData, 'name', 'statName').get(), [
-
-            {'id': 1, 'statName': 'Deleted','statusId': 0},
-            {'id': 2, 'statName': undefined,'statusId': 99},
-            {'id': 3, 'statName': 'Pending','statusId': 2}
-
-            ],
-           'e.select().associate(\'statusId\', statusData, \'name\', \'statName\').get()');
-
     });
 
     QUnit.test(title + 'regEx()', function(assert){
@@ -398,19 +335,6 @@ var runTests = function(title, JSQL){
             ],
             'e.sortDesc(\'a\').get()'
         );
-    });
-
-    QUnit.test(title + 'count()', function(assert){
-        var testData = [
-            {'a': 1, 'b': 'pa'},
-            {'a': 1, 'b': 'dd'},
-            {'a': 2, 'b': 'dc'},
-            {'a': 3, 'b': 'ca'},
-        ];
-        var e = new JSQL(testData);
-        assert.deepEqual(e.select().orWhere([{'a': 1}]).count(), 2, 'e.select().orWhere([{\'a\': 1}]).count()');
-        assert.deepEqual(e.select().orWhere([{'a': 2}, {'a': 3}]).count(), 2, 'e.select().orWhere([{\'a\': 2}, {\'a\': 3}]).count()');
-        assert.deepEqual(e.select().orWhere({'a': 5}).count(), 0, 'e.select().orWhere({\'a\': 5}).count()');
     });
 
     QUnit.test(title + 'in()', function(assert){
@@ -775,24 +699,25 @@ var runTests = function(title, JSQL){
     QUnit.test(title + '_areAllObjects()', function(assert){
         var testData = [{'a': 'b', 'c': [1,2,3]}, {}, []];
         var e = new JSQL(testData);
-        assert.deepEqual(e._areAllObjects(['a', []]), false, '["a", []]');
-        assert.deepEqual(e._areAllObjects([{}, {}]), true, '[{}, {}]');
-        assert.deepEqual(e._areAllObjects([{}]), true, '[{}]');
-        assert.deepEqual(e._areAllObjects([]), false, '[]');
-        assert.deepEqual(e._areAllObjects([null]), false, '[null]');
-        assert.deepEqual(e._areAllObjects([true]), false, '[true]');
-        assert.deepEqual(e._areAllObjects([false]), false, '[false]');
-        assert.deepEqual(e._areAllObjects([0]), false, '[0]');
-        assert.deepEqual(e._areAllObjects([1]), false, '[1]');
-        assert.deepEqual(e._areAllObjects(['0']), false, '["0"]');
-        assert.deepEqual(e._areAllObjects(['1']), false, '["1"]');
-        assert.deepEqual(e._areAllObjects([{}, null]), false, '[{}, null]');
-        assert.deepEqual(e._areAllObjects([{}, true]), false, '[{}, true]');
-        assert.deepEqual(e._areAllObjects([{}, false]), false, '[{}, false]');
-        assert.deepEqual(e._areAllObjects([{}, 0]), false, '[{}, 0]');
-        assert.deepEqual(e._areAllObjects([{}, 1]), false, '[{}, 1]');
-        assert.deepEqual(e._areAllObjects([{}, '0']), false, '[{}, "0"]');
-        assert.deepEqual(e._areAllObjects([{}, '1']), false, '[{}, "1"]');
+        var f = e._areAllObjects;
+        assert.deepEqual(f(['a', []]), false, '["a", []]');
+        assert.deepEqual(f([{}, {}]), true, '[{}, {}]');
+        assert.deepEqual(f([{}]), true, '[{}]');
+        assert.deepEqual(f([]), false, '[]');
+        assert.deepEqual(f([null]), false, '[null]');
+        assert.deepEqual(f([true]), false, '[true]');
+        assert.deepEqual(f([false]), false, '[false]');
+        assert.deepEqual(f([0]), false, '[0]');
+        assert.deepEqual(f([1]), false, '[1]');
+        assert.deepEqual(f(['0']), false, '["0"]');
+        assert.deepEqual(f(['1']), false, '["1"]');
+        assert.deepEqual(f([{}, null]), false, '[{}, null]');
+        assert.deepEqual(f([{}, true]), false, '[{}, true]');
+        assert.deepEqual(f([{}, false]), false, '[{}, false]');
+        assert.deepEqual(f([{}, 0]), false, '[{}, 0]');
+        assert.deepEqual(f([{}, 1]), false, '[{}, 1]');
+        assert.deepEqual(f([{}, '0']), false, '[{}, "0"]');
+        assert.deepEqual(f([{}, '1']), false, '[{}, "1"]');
     });
 
     QUnit.test(title + '_stripEmptyProps()', function(assert){
@@ -836,7 +761,17 @@ var runTests = function(title, JSQL){
 
     });
 
+    QUnit.test(title + '_processArguments()', function(assert){
+        var e = new JSQL([]);
+        var f = e._processArguments;
 
+        assert.deepEqual(f([]).clause, 'VOID', '[] => VOID');
+        assert.deepEqual(f(['a', 1]).clause, 'AND', "['a', 1] => AND");
+        assert.deepEqual(f([{}]).clause, 'AND', '[{}] => AND');
+        assert.deepEqual(f([{'a': 3}]).clause, 'AND', "[{'a': 3}] => AND");
+        assert.deepEqual(e._processArguments([{'a': 3}, {}]).clause, 'OR', "[{'a': 3}, {}] => OR");
+
+    });
 
 };
 
