@@ -6,13 +6,139 @@
         define([], factory);
     } else{
         // Browser globals
-        root.JSQL = factory();
+        root['JSQL'] = factory();
     }
 }(this, function(){
 
+
+    // Polyfills
+    // .trim()
+    if(typeof String.prototype.trim !== 'function'){
+        String.prototype.trim = function(){
+            return this.replace(/^\s+|\s+$/g, '');
+        };
+    }
+
+    // .isArray()
+    if(!Array.isArray){
+        Array.isArray = function(arg){
+            return Object.prototype.toString.call(arg) === '[object Array]';
+        };
+    }
+
+    // .keys()
+    // From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+    if(!Object.keys){
+        Object.keys = (function(){
+            'use strict';
+            var hasOwnProperty = Object.prototype.hasOwnProperty,
+                hasDontEnumBug = !({toString: null}).propertyIsEnumerable('toString'),
+                dontEnums = [
+                  'toString',
+                  'toLocaleString',
+                  'valueOf',
+                  'hasOwnProperty',
+                  'isPrototypeOf',
+                  'propertyIsEnumerable',
+                  'constructor'
+                ],
+                dontEnumsLength = dontEnums.length;
+
+            return function(obj){
+                if(typeof obj !== 'object' && (typeof obj !== 'function' || obj === null)){
+                    throw new TypeError('Object.keys called on non-object');
+                }
+
+                var result = [], prop, i;
+
+                for(prop in obj){
+                    if(hasOwnProperty.call(obj, prop)){
+                        result.push(prop);
+                    }
+                }
+
+                if(hasDontEnumBug){
+                    for(i = 0; i < dontEnumsLength; i++){
+                        if(hasOwnProperty.call(obj, dontEnums[i])){
+                            result.push(dontEnums[i]);
+                        }
+                    }
+                }
+                return result;
+            };
+        }());
+    }
+
+    // indexOf
+    // Production steps of ECMA-262, Edition 5, 15.4.4.14
+    // Reference: http://es5.github.io/#x15.4.4.14
+    if(!Array.prototype.indexOf){
+        Array.prototype.indexOf = function(searchElement, fromIndex){
+
+            var k;
+
+            // 1. Let O be the result of calling ToObject passing
+            //    the this value as the argument.
+            if(this == null){
+                throw new TypeError('"this" is null or not defined');
+            }
+
+            var O = Object(this);
+
+            // 2. Let lenValue be the result of calling the Get
+            //    internal method of O with the argument "length".
+            // 3. Let len be ToUint32(lenValue).
+            var len = O.length >>> 0;
+
+            // 4. If len is 0, return -1.
+            if(len === 0){
+                return -1;
+            }
+
+            // 5. If argument fromIndex was passed let n be
+            //    ToInteger(fromIndex); else let n be 0.
+            var n = +fromIndex || 0;
+
+            if(Math.abs(n) === Infinity){
+                n = 0;
+            }
+
+            // 6. If n >= len, return -1.
+            if(n >= len){
+                return -1;
+            }
+
+            // 7. If n >= 0, then Let k be n.
+            // 8. Else, n<0, Let k be len - abs(n).
+            //    If k is less than 0, then let k be 0.
+            k = Math.max(n >= 0 ? n : len - Math.abs(n), 0);
+
+            // 9. Repeat, while k < len
+            while(k < len){
+                // a. Let Pk be ToString(k).
+                //   This is implicit for LHS operands of the in operator
+                // b. Let kPresent be the result of calling the
+                //    HasProperty internal method of O with argument Pk.
+                //   This step can be combined with c
+                // c. If kPresent is true, then
+                //    i.  Let elementK be the result of calling the Get
+                //        internal method of O with the argument ToString(k).
+                //   ii.  Let same be the result of applying the
+                //        Strict Equality Comparison Algorithm to
+                //        searchElement and elementK.
+                //  iii.  If same is true, return k.
+                if(k in O && O[k] === searchElement){
+                    return k;
+                }
+                k++;
+            }
+            return -1;
+        };
+    }
+
     var JSQL = function(value){
         this.data = value;
-        this.tmp  = value;
+        this.tmp = value;
 
         this.query = {
             debug: {
@@ -65,7 +191,6 @@
         if(this._isObjectEmpty(property)){
             return [];
         }
-
         return this._filter(collection, function(obj){
             for(var prop in property){
                 if(property.hasOwnProperty(prop)){
@@ -86,7 +211,7 @@
      * @return {Boolean}
      */
     JSQL.prototype._isObjectEmpty = function(obj){
-        for(var prop in obj) {
+        for(var prop in obj){
             if(obj.hasOwnProperty(prop)){
                 return false;
             }
@@ -203,7 +328,7 @@
         var clean = {};
         for(var prop in obj){
             if(obj.hasOwnProperty(prop)){
-               if(typeof obj[prop] !== 'string' || obj[prop].trim() !== ''){
+                if(typeof obj[prop] !== 'string' || obj[prop].trim() !== ''){
                     clean[prop] = obj[prop];
                 }
             }
@@ -214,7 +339,7 @@
     JSQL.prototype._stripEmptyPropsFromCollection = function(list){
         var i = 0;
         var len = list.length;
-        for(i=0; i<len; i++){
+        for(i = 0; i < len; i++){
             list[i] = this._stripEmptyProps(list[i]);
         }
         return list;
@@ -272,10 +397,9 @@
         return this.query.options[option];
     };
 
-
     JSQL.prototype._processArguments = function(args){
 
-        var info = { clause: 'VOID', args: undefined , type: 0};
+        var info = {clause: 'VOID', args: undefined, type: 0};
 
         // no arguments
         if(args.length === 0){
@@ -284,7 +408,7 @@
         }
 
         // invalid arguments
-       if(args[0] === null || args[0] === undefined){
+        if(args[0] === null || args[0] === undefined){
             info.type = 2;
             return info;
         }
@@ -340,9 +464,6 @@
         return this;
     };
 
-
-
-
     /**
      * Where clause
      * ('a', 'b') : where 'a' = 'b'
@@ -360,12 +481,12 @@
         var info = this._processArguments(arguments);
         info.args = this._applyOptions(info.args);
 
-        if(info.clause === "AND"){
+        if(info.clause === 'AND'){
             this.tmp = this._queryObj(this.tmp, info.args);
             return this;
         }
 
-        if(info.clause === "OR"){
+        if(info.clause === 'OR'){
             this._orWhere(info.args);
             return this;
         }
@@ -592,7 +713,7 @@
      * @param  {array} val array set to check in
      * @return {object}
      */
-    JSQL.prototype.in = function(key, val){
+    JSQL.prototype.isIn = function(key, val){
         this._addOp('in');
         this.tmp = this._filter(this.tmp, function(obj){
             return val.indexOf(obj[key]) !== -1;
@@ -608,7 +729,7 @@
      * @param  {array} val array set to check in
      * @return {object}
      */
-    JSQL.prototype.notIn = function(key, val){
+    JSQL.prototype.isNotIn = function(key, val){
         this._addOp('notIn');
         this.tmp = this._filter(this.tmp, function(obj){
             return val.indexOf(obj[key]) === -1;
@@ -804,7 +925,7 @@
         this._addOp('transform');
         var i = 0;
         var len = this.tmp.length;
-        for(i = 0 ; i < len; i++){
+        for(i = 0; i < len; i++){
             callback(this.tmp[i]);
         }
         return this;
