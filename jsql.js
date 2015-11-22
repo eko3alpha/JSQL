@@ -1,4 +1,4 @@
-/* globals define,  _ */
+/* globals define */
 'use strict';
 (function(root, factory){
     if(typeof define === 'function' && define.amd){
@@ -6,7 +6,7 @@
         define([], factory);
     } else{
         // Browser globals
-        root['JSQL'] = factory();
+        root.JSQL = factory();
     }
 }(this, function(){
 
@@ -66,6 +66,13 @@
     // End Polyfills
     -----------------------------------------------------------------*/
 
+    /**
+     * Constructor
+     *
+     * @constructor
+     * @param {Array} value
+     */
+
     var JSQL = function(value){
         this.data = value;
         this.tmp = value;
@@ -92,6 +99,7 @@
      * @param {Object} options User options
      * @returns {Object} Merged values of defaults and options
      */
+
     JSQL.prototype._extend = function(defaults, options){
         var extended = {};
         var prop;
@@ -117,6 +125,7 @@
      * @param  {Object} property   object containing properties to search
      * @return {Array}            collection of matched objects
      */
+
     JSQL.prototype._queryObj = function(collection, property){
         if(this._isObjectEmpty(property)){
             return [];
@@ -137,9 +146,10 @@
      * Utility to check if value is empty object
      *
      * @private
-     * @param  {*}  obj value to check
+     * @param  {Object}  obj value to check
      * @return {Boolean}
      */
+
     JSQL.prototype._isObjectEmpty = function(obj){
         for(var prop in obj){
             if(obj.hasOwnProperty(prop)){
@@ -152,9 +162,11 @@
     /**
      * Gets an array of unique values
      *
+     * @private
      * @param  {Array} list array to extract uniques
      * @return {Array}      unique values
      */
+
     JSQL.prototype._getUnique = function(list){
         var seen = [];
         return this._filter(list, function(x){
@@ -175,6 +187,7 @@
      * @param  {Function} callback callback to execute on each iteration
      * @return {Array}
      */
+
     JSQL.prototype._filter = function(list, callback){
         var passedElements = [];
         var i;
@@ -195,6 +208,7 @@
      * @param  {Function} callback function to execute on every value
      * @return {*}
      */
+
     JSQL.prototype._map = function(list, callback){
         var mapped = [];
         var i;
@@ -213,6 +227,7 @@
      * @param  {String} key  property to extract
      * @return {Array}
      */
+
     JSQL.prototype._pluck = function(list, key){
         var i = 0;
         var len = list.length
@@ -227,10 +242,12 @@
      * Extracts the properties given from
      * objects.  Select implementation
      *
-     * @param  {Array} list list of objects
-     * @param  {Array} keys properties to extract
-     * @return {Object}
+     * @private
+     * @param  {Array} list List of objects
+     * @param  {Array} keys Properties to extract
+     * @return {Array}
      */
+
     JSQL.prototype._pluckMany = function(list, keys){
         return this._map(list, function(item){
             var obj = {};
@@ -249,6 +266,7 @@
      * or strings with white spaces
      * from the seraches, based off of the
      * ignoreEmptyString implementation
+     *
      * @private
      * @param  {Object} obj object to strip
      * @return {Object}
@@ -279,8 +297,9 @@
      * Adds operation to queue
      *
      * @private
-     * @return {void}
+     * @return {Undefined}
      */
+
     JSQL.prototype._addOp = function(op){
         this.query.debug.operations.push(op);
     };
@@ -291,6 +310,7 @@
      * @public
      * @returns {Object}
      */
+
     JSQL.prototype.debug = function(){
         return this.query.debug;
     };
@@ -298,13 +318,23 @@
     /**
      * Query options
      *
+     * @public
      * @param  {Object} options options
-     * @return {void}
+     * @return {JSQL}
      */
+
     JSQL.prototype.options = function(options){
         this.query.options = this._extend(this.query.options, options);
         return this;
     };
+
+    /**
+     * Applies options on arguments
+     *
+     * @private
+     * @param  {Array} args Array of arguments
+     * @return {Array}
+     */
 
     JSQL.prototype._applyOptions = function(args){
 
@@ -312,12 +342,12 @@
         if(this._getOpt('ignoreEmptyString')){
             args = this._stripEmptyPropsFromCollection(args);
         }
-
         return args;
     };
 
     /**
      * Returns the option value
+     *
      * @private
      * @param  {String} option option key
      * @return {*}
@@ -326,6 +356,15 @@
     JSQL.prototype._getOpt = function(option){
         return this.query.options[option];
     };
+
+    /**
+     * Processes the arguments passed in the
+     * where clause
+     *
+     * @private
+     * @param  {Array} args Array of arguments
+     * @return {Object}
+     */
 
     JSQL.prototype._processArguments = function(args){
 
@@ -385,8 +424,9 @@
      * as arguments
      *
      * @public
-     * @return {String} 0 or many string arguments allowed
+     * @return {JSQL} 0 or many string arguments allowed
      */
+
     JSQL.prototype.select = function(){
         this._addOp('select');
         this._reset();
@@ -402,10 +442,10 @@
      * ({'a': 1}, {'b': 2}) : where 'a' = 1 or 'b' = 2
      *
      * @public
-     * @param  {string|array|object}
-     * @param  {string|number}
-     * @return {Object}
+     * @param  {*}
+     * @return {JSQL}
      */
+
     JSQL.prototype.where = function(){
 
         var info = this._processArguments(arguments);
@@ -430,8 +470,9 @@
      *
      * @public
      * @param  {*} val value to test against
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.contains = function(val){
         this._addOp('contains');
         this.tmp = this._filter(this.tmp, function(obj){
@@ -448,12 +489,13 @@
     };
 
     /**
-     * Checks if all elmeents are objects {}
+     * Checks if all elements are objects {}
      *
      * @private
      * @param  {Array} list collection of items
      * @return {Boolean}
      */
+
     JSQL.prototype._areAllObjects = function(list){
         var i;
         var len = list.length;
@@ -474,10 +516,11 @@
     /**
      * Or where clause
      *
-     * @public
+     * @private
      * @param  {Array} val objects containing where clauses
-     * @return {Object}
+     * @return {Undefined}
      */
+
     JSQL.prototype._orWhere = function(val){
         this._addOp('orWhere');
         var self = this;
@@ -498,9 +541,10 @@
      *
      * @public
      * @param  {String} key  key to sort on
-     * @param  {string|undefined} sort what sorting type to use
-     * @return {Object}
+     * @param  {String|Undefined} sort what sorting type to use
+     * @return {JSQL}
      */
+
     JSQL.prototype.sortBy = function(key, sort){
         if(typeof key === 'object'){
             for(var props in key){
@@ -517,9 +561,9 @@
 
         if(sort === 'desc'){
             this.sortDesc(key);
-        } else{
-            this.sortAsc(key);
+            return this;
         }
+        this.sortAsc(key);
         return this;
     };
 
@@ -528,8 +572,9 @@
      *
      * @public
      * @param  {String} val key to sort on
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.sortAsc = function(val){
         this.query.sort[val] = 1;
         return this;
@@ -540,21 +585,23 @@
      *
      * @public
      * @param  {String} val key to sort on
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.sortDesc = function(val){
         this.query.sort[val] = -1;
         return this;
     };
 
     /**
-     * Implementation of the sorting
+     * Sorting Implementation
      *
      * @private
      * @param  {Array} list list to sort on
      * @param  {Object} sort object containing sort criteria
      * @return {Array}      sorted collection
      */
+
     JSQL.prototype._getSorted = function(list, sort){
         var keys = Object.keys(sort);
         var sorted = this._sortFirstBy(keys[0], sort[keys[0]]);
@@ -578,6 +625,7 @@
      * https://github.com/Teun/thenBy.js
      * @private
      */
+
     JSQL.prototype._sortFirstBy = (function(){
         function makeCompareFunction(f, sort){
             if(typeof(f) !== 'function'){
@@ -601,6 +649,7 @@
             return f;
         }
         /* mixin for the `thenBy` property */
+
         function extend(f, d){
             f = makeCompareFunction(f, d);
             f.thenBy = tb;
@@ -610,6 +659,7 @@
         /* adds a secondary compare function to the target function (`this` context)
            which is applied in case the first one returns 0 (equal)
            returns a new compare function, which has a `thenBy` method as well */
+
         function tb(y, d){
             var x = this;
             y = makeCompareFunction(y, d);
@@ -625,9 +675,10 @@
      *
      * @public
      * @param  {Number} limit  maximum number of objects to return
-     * @param  {Number} offset the offset of the first object to return
-     * @return {Array}
+     * @param  {Number|Null} offset the offset of the first object to return
+     * @return {JSQL}
      */
+
     JSQL.prototype.limit = function(limit, offset){
         this._addOp('limit');
         offset = offset || 0;
@@ -641,8 +692,9 @@
      * @public
      * @param  {String} key property to test
      * @param  {Array} val array set to check in
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.isIn = function(key, val){
         this._addOp('in');
         this.tmp = this._filter(this.tmp, function(obj){
@@ -657,8 +709,9 @@
      * @public
      * @param  {String} key property to test
      * @param  {Array} val array set to check in
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.isNotIn = function(key, val){
         this._addOp('notIn');
         this.tmp = this._filter(this.tmp, function(obj){
@@ -676,8 +729,9 @@
      * @param  {Number} min minimum value
      * @param  {Number} max maximum value
      * @param  {Boolean} exclusive flag
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.between = function(key, min, max, exclusive){
         this._addOp('between');
         if(exclusive){
@@ -699,10 +753,11 @@
      *
      * @public
      * @param  {String} key   key property to check
-     * @param  {regEx} regex regular exression /expression/
+     * @param  {Object} regex regular exression /expression/
      * @param  {Boolean} i     case insensitive flag
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.regEx = function(key, regex, i){
         this._addOp('regex');
         // case insensitive
@@ -730,6 +785,7 @@
      * @param  {String} val string regular expression
      * @return {String}     escaped regex as string
      */
+
     JSQL.prototype._escapeRegex = function(val){
         return String(val).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
     };
@@ -740,8 +796,9 @@
      * @public
      * @param  {String} key property name
      * @param  {String} val string fragment
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.startsWith = function(key, val){
         this._addOp('startsWith');
         val = this._escapeRegex(val);
@@ -755,8 +812,9 @@
      * @public
      * @param  {String} key property name
      * @param  {String} val string fragment
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.endsWith = function(key, val){
         this._addOp('endsWith');
         val = this._escapeRegex(val);
@@ -770,8 +828,9 @@
      * @public
      * @param  {String} key property name
      * @param  {String} val string fragment
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.like = function(key, val){
         this._addOp('like');
         val = this._escapeRegex(val);
@@ -785,8 +844,9 @@
      * @public
      * @param  {String} key property name
      * @param  {number} val number to test against
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.lt = function(key, val){
         this._addOp('lt');
         this.tmp = this._filter(this.tmp, function(obj){
@@ -801,8 +861,9 @@
       * @public
       * @param  {String} key property name
       * @param  {number} val number to test against
-      * @return {Object}
+      * @return {JSQL}
       */
+
     JSQL.prototype.gt = function(key, val){
         this._addOp('gt');
         this.tmp = this._filter(this.tmp, function(obj){
@@ -817,8 +878,9 @@
       * @public
       * @param  {String} key property name
       * @param  {number} val number to test against
-      * @return {Object}
+      * @return {JSQL}
       */
+
     JSQL.prototype.lte = function(key, val){
         this._addOp('lte');
         this.tmp = this._filter(this.tmp, function(obj){
@@ -833,8 +895,9 @@
       * @public
       * @param  {String} key property name
       * @param  {number} val number to test against
-      * @return {Object}
+      * @return {JSQL}
       */
+
     JSQL.prototype.gte = function(key, val){
         this._addOp('gte');
         this.tmp = this._filter(this.tmp, function(obj){
@@ -849,8 +912,9 @@
      *
      * @public
      * @param  {Function} callback function to execute
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.transform = function(callback){
         this._addOp('transform');
         var i = 0;
@@ -868,6 +932,7 @@
      * @public
      * @return {Array}
      */
+
     JSQL.prototype.get = function(){
         var finalVal = this.tmp;
 
@@ -897,8 +962,9 @@
      * after rules have been applied
      *
      * @public
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.getOne = function(){
         return this.get().slice(0, 1)[0];
     };
@@ -909,8 +975,9 @@
      *
      * @public
      * @param  {String} val property to get uniques from
-     * @return {Object}
+     * @return {JSQL}
      */
+
     JSQL.prototype.distinct = function(val){
         this.query.distinct = val;
         return this;
@@ -918,10 +985,11 @@
 
     /**
      * Resets internal value
-     * @private
      *
-     * @return {void}
+     * @private
+     * @return {Undefined}
      */
+
     JSQL.prototype._reset = function(){
         this.tmp = this.data;
         this.query = {
