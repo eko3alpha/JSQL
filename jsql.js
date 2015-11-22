@@ -183,9 +183,9 @@
      * that match passed properties
      *
      * @private
-     * @param  {array} collection array of objects
-     * @param  {object} property   object containing properties to search
-     * @return {array}            collection of matched objects
+     * @param  {Array} collection array of objects
+     * @param  {Object} property   object containing properties to search
+     * @return {Array}            collection of matched objects
      */
     JSQL.prototype._queryObj = function(collection, property){
         if(this._isObjectEmpty(property)){
@@ -207,7 +207,7 @@
      * Utility to check if value is empty object
      *
      * @private
-     * @param  {mixed}  value value to check
+     * @param  {*}  obj value to check
      * @return {Boolean}
      */
     JSQL.prototype._isObjectEmpty = function(obj){
@@ -222,8 +222,8 @@
     /**
      * Gets an array of unique values
      *
-     * @param  {array} list array to extract uniques
-     * @return {array}      unique values
+     * @param  {Array} list array to extract uniques
+     * @return {Array}      unique values
      */
     JSQL.prototype._getUnique = function(list){
         var seen = [];
@@ -241,9 +241,9 @@
      * that pass the test implemented by the provided function.
      *
      * @private
-     * @param  {[type]}   list     [description]
-     * @param  {Function} callback [description]
-     * @return {[type]}            [description]
+     * @param  {Array}   list     list to filter on
+     * @param  {Function} callback callback to execute on each iteration
+     * @return {Array}
      */
     JSQL.prototype._filter = function(list, callback){
         var passedElements = [];
@@ -261,9 +261,9 @@
      * Mapping function
      *
      * @private
-     * @param  {array}   list     list of values
+     * @param  {Array}   list     list of values
      * @param  {Function} callback function to execute on every value
-     * @return {mixed}
+     * @return {*}
      */
     JSQL.prototype._map = function(list, callback){
         var mapped = [];
@@ -279,9 +279,9 @@
      * Extracts the given keys
      *
      * @private
-     * @param  {array} list list of objects
-     * @param  {string} key  property to extract
-     * @return {array}
+     * @param  {Array} list list of objects
+     * @param  {String} key  property to extract
+     * @return {Array}
      */
     JSQL.prototype._pluck = function(list, key){
         var i = 0;
@@ -297,9 +297,9 @@
      * Extracts the properties given from
      * objects.  Select implementation
      *
-     * @param  {array} list list of objects
-     * @param  {array} keys properties to extract
-     * @return {object}
+     * @param  {Array} list list of objects
+     * @param  {Array} keys properties to extract
+     * @return {Object}
      */
     JSQL.prototype._pluckMany = function(list, keys){
         return this._map(list, function(item){
@@ -320,8 +320,8 @@
      * from the seraches, based off of the
      * ignoreEmptyString implementation
      * @private
-     * @param  {object} obj object to strip
-     * @return {object}
+     * @param  {Object} obj object to strip
+     * @return {Object}
      */
 
     JSQL.prototype._stripEmptyProps = function(obj){
@@ -368,7 +368,7 @@
     /**
      * Query options
      *
-     * @param  {object} options options
+     * @param  {Object} options options
      * @return {void}
      */
     JSQL.prototype.options = function(options){
@@ -389,8 +389,8 @@
     /**
      * Returns the option value
      * @private
-     * @param  {string} option option key
-     * @return {mixed}
+     * @param  {String} option option key
+     * @return {*}
      */
 
     JSQL.prototype._getOpt = function(option){
@@ -455,7 +455,7 @@
      * as arguments
      *
      * @public
-     * @return {string} 0 or many string arguments allowed
+     * @return {String} 0 or many string arguments allowed
      */
     JSQL.prototype.select = function(){
         this._addOp('select');
@@ -472,9 +472,9 @@
      * ({'a': 1}, {'b': 2}) : where 'a' = 1 or 'b' = 2
      *
      * @public
-     * @param  {string|array|object} val
+     * @param  {string|array|object}
      * @param  {string|number}
-     * @return {object}
+     * @return {Object}
      */
     JSQL.prototype.where = function(){
 
@@ -499,8 +499,8 @@
      * the value given, truthy ( == )
      *
      * @public
-     * @param  {mixed} val value to test against
-     * @return {object}
+     * @param  {*} val value to test against
+     * @return {Object}
      */
     JSQL.prototype.contains = function(val){
         this._addOp('contains');
@@ -521,8 +521,8 @@
      * Checks if all elmeents are objects {}
      *
      * @private
-     * @param  {array} list collection of items
-     * @return {boolean}
+     * @param  {Array} list collection of items
+     * @return {Boolean}
      */
     JSQL.prototype._areAllObjects = function(list){
         var i;
@@ -545,8 +545,8 @@
      * Or where clause
      *
      * @public
-     * @param  {array} val objects containing where clauses
-     * @return {object}
+     * @param  {Array} val objects containing where clauses
+     * @return {Object}
      */
     JSQL.prototype._orWhere = function(val){
         this._addOp('orWhere');
@@ -567,9 +567,9 @@
      * Sets the sorting values for later processing
      *
      * @public
-     * @param  {string} key  key to sort on
+     * @param  {String} key  key to sort on
      * @param  {string|undefined} sort what sorting type to use
-     * @return {object}
+     * @return {Object}
      */
     JSQL.prototype.sortBy = function(key, sort){
         if(typeof key === 'object'){
@@ -597,8 +597,8 @@
      * Adds entry for sorting key to asc
      *
      * @public
-     * @param  {string} val key to sort on
-     * @return {object}
+     * @param  {String} val key to sort on
+     * @return {Object}
      */
     JSQL.prototype.sortAsc = function(val){
         this.query.sort[val] = 1;
@@ -609,8 +609,8 @@
      * Adds entry for sorting key to desc
      *
      * @public
-     * @param  {string} val key to sort on
-     * @return {object}
+     * @param  {String} val key to sort on
+     * @return {Object}
      */
     JSQL.prototype.sortDesc = function(val){
         this.query.sort[val] = -1;
@@ -621,9 +621,9 @@
      * Implementation of the sorting
      *
      * @private
-     * @param  {array} list list to sort on
-     * @param  {object} sort object containing sort criteria
-     * @return {array}      sorted collection
+     * @param  {Array} list list to sort on
+     * @param  {Object} sort object containing sort criteria
+     * @return {Array}      sorted collection
      */
     JSQL.prototype._getSorted = function(list, sort){
         var keys = Object.keys(sort);
@@ -694,9 +694,9 @@
      * Constrains the number of items in a result set
      *
      * @public
-     * @param  {integer} limit  maximum number of objects to return
-     * @param  {integer} offset the offset of the first object to return
-     * @return {array}
+     * @param  {Number} limit  maximum number of objects to return
+     * @param  {Number} offset the offset of the first object to return
+     * @return {Array}
      */
     JSQL.prototype.limit = function(limit, offset){
         this._addOp('limit');
@@ -709,9 +709,9 @@
      * Checks if value is in an array set
      *
      * @public
-     * @param  {string} key property to test
-     * @param  {array} val array set to check in
-     * @return {object}
+     * @param  {String} key property to test
+     * @param  {Array} val array set to check in
+     * @return {Object}
      */
     JSQL.prototype.isIn = function(key, val){
         this._addOp('in');
@@ -725,9 +725,9 @@
      * Checks if value is not in an array set
      *
      * @public
-     * @param  {string} key property to test
-     * @param  {array} val array set to check in
-     * @return {object}
+     * @param  {String} key property to test
+     * @param  {Array} val array set to check in
+     * @return {Object}
      */
     JSQL.prototype.isNotIn = function(key, val){
         this._addOp('notIn');
@@ -742,11 +742,11 @@
      * default is inclusive
      *
      * @public
-     * @param  {string} key property to check
-     * @param  {integer} min minimum value
-     * @param  {integer} max maximum value
-     * @param  {boolean} exclusive flag
-     * @return {object}
+     * @param  {String} key property to check
+     * @param  {Number} min minimum value
+     * @param  {Number} max maximum value
+     * @param  {Boolean} exclusive flag
+     * @return {Object}
      */
     JSQL.prototype.between = function(key, min, max, exclusive){
         this._addOp('between');
@@ -768,10 +768,10 @@
      * Regular Expression search
      *
      * @public
-     * @param  {string} key   key property to check
+     * @param  {String} key   key property to check
      * @param  {regEx} regex regular exression /expression/
-     * @param  {boolean} i     case insensitive flag
-     * @return {object}
+     * @param  {Boolean} i     case insensitive flag
+     * @return {Object}
      */
     JSQL.prototype.regEx = function(key, regex, i){
         this._addOp('regex');
@@ -797,8 +797,8 @@
      * Gets string version of escaped regular expression
      *
      * @private
-     * @param  {string} val string regular expression
-     * @return {string}     escaped regex as string
+     * @param  {String} val string regular expression
+     * @return {String}     escaped regex as string
      */
     JSQL.prototype._escapeRegex = function(val){
         return String(val).replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
@@ -808,9 +808,9 @@
      * Gets objects that have property that starts with value
      *
      * @public
-     * @param  {string} key property name
-     * @param  {string} val string fragment
-     * @return {object}
+     * @param  {String} key property name
+     * @param  {String} val string fragment
+     * @return {Object}
      */
     JSQL.prototype.startsWith = function(key, val){
         this._addOp('startsWith');
@@ -823,9 +823,9 @@
      * Gets objects that have property that ends with value
      *
      * @public
-     * @param  {string} key property name
-     * @param  {string} val string fragment
-     * @return {object}
+     * @param  {String} key property name
+     * @param  {String} val string fragment
+     * @return {Object}
      */
     JSQL.prototype.endsWith = function(key, val){
         this._addOp('endsWith');
@@ -838,9 +838,9 @@
      * Gets objects that have property that contains value
      *
      * @public
-     * @param  {string} key property name
-     * @param  {string} val string fragment
-     * @return {object}
+     * @param  {String} key property name
+     * @param  {String} val string fragment
+     * @return {Object}
      */
     JSQL.prototype.like = function(key, val){
         this._addOp('like');
@@ -853,9 +853,9 @@
      * Less than
      *
      * @public
-     * @param  {string} key property name
+     * @param  {String} key property name
      * @param  {number} val number to test against
-     * @return {object}
+     * @return {Object}
      */
     JSQL.prototype.lt = function(key, val){
         this._addOp('lt');
@@ -869,9 +869,9 @@
       * Greater than
       *
       * @public
-      * @param  {string} key property name
+      * @param  {String} key property name
       * @param  {number} val number to test against
-      * @return {object}
+      * @return {Object}
       */
     JSQL.prototype.gt = function(key, val){
         this._addOp('gt');
@@ -885,9 +885,9 @@
       * Less than or equal to
       *
       * @public
-      * @param  {string} key property name
+      * @param  {String} key property name
       * @param  {number} val number to test against
-      * @return {object}
+      * @return {Object}
       */
     JSQL.prototype.lte = function(key, val){
         this._addOp('lte');
@@ -901,9 +901,9 @@
       * Greater than or equal to
       *
       * @public
-      * @param  {string} key property name
+      * @param  {String} key property name
       * @param  {number} val number to test against
-      * @return {object}
+      * @return {Object}
       */
     JSQL.prototype.gte = function(key, val){
         this._addOp('gte');
@@ -919,7 +919,7 @@
      *
      * @public
      * @param  {Function} callback function to execute
-     * @return {object}
+     * @return {Object}
      */
     JSQL.prototype.transform = function(callback){
         this._addOp('transform');
@@ -936,7 +936,7 @@
      * applying rules
      *
      * @public
-     * @return {array}
+     * @return {Array}
      */
     JSQL.prototype.get = function(){
         var finalVal = this.tmp;
@@ -967,7 +967,7 @@
      * after rules have been applied
      *
      * @public
-     * @return {object}
+     * @return {Object}
      */
     JSQL.prototype.getOne = function(){
         return this.get().slice(0, 1)[0];
@@ -978,8 +978,8 @@
      * extract once rules applied
      *
      * @public
-     * @param  {string} val property to get uniques from
-     * @return {object}
+     * @param  {String} val property to get uniques from
+     * @return {Object}
      */
     JSQL.prototype.distinct = function(val){
         this.query.distinct = val;
