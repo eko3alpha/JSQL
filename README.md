@@ -1,5 +1,4 @@
-# Do not use
-# this was for academic purposes only!
+# Do not use, this was for my own academic purposes only!
 
 # JSQL
 JSQL allows you to dynamically build queries to run against a collection of objects in a very human readable syntax.  It's perfect for filtering/sorting table data.
