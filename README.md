@@ -1,4 +1,5 @@
 # Do not use, this was for my own academic purposes only!
+There is really no need for something like this with functional libraries like [Ramda](http://ramdajs.com/)
 
 # JSQL
 JSQL allows you to dynamically build queries to run against a collection of objects in a very human readable syntax.  It's perfect for filtering/sorting table data.
